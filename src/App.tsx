@@ -1,23 +1,43 @@
-import { useEffect, useState } from "react";
+import { HashRouter, Link, Route, Routes, useNavigate } from "react-router-dom";
+import TaskForm from "./components/TaskForm";
+import TaskList from "./components/TaskList";
 
-function App() {
-  const [json, setJson] = useState("Loading...");
+function TasksPage() {
+  return (
+    <>
+      <p>
+        <Link to="/tasks/new">Add task</Link>
+      </p>
+      <TaskList />
+    </>
+  );
+}
 
-  useEffect(() => {
-    fetch("/api/tasks")
-      .then((response) => {
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return response.json();
-      })
-      .then((data) => setJson(JSON.stringify(data, null, 2)))
-      .catch((error) => setJson(`Error: ${error.message}`));
-  }, []);
+function NewTaskPage() {
+  const navigate = useNavigate();
 
   return (
-    <main>
-      <h1>Scraper</h1>
-      <pre>{json}</pre>
-    </main>
+    <>
+      <p>
+        <Link to="/">Back</Link>
+      </p>
+      <TaskForm onCreated={() => navigate("/")} />
+    </>
+  );
+}
+
+// HashRouter: the phone's server only serves "/", so routes live after the "#".
+function App() {
+  return (
+    <HashRouter>
+      <main>
+        <h1>Scraper</h1>
+        <Routes>
+          <Route path="/" element={<TasksPage />} />
+          <Route path="/tasks/new" element={<NewTaskPage />} />
+        </Routes>
+      </main>
+    </HashRouter>
   );
 }
 
