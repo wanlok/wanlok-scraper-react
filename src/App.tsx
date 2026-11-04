@@ -36,10 +36,14 @@ function NewTaskPage() {
 function EditTaskPage() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
-  const { task, loading, error, save, saving, saveError } = useTask(id);
+  const { task, loading, error, save, saving, saveError, remove, removing, removeError } = useTask(id);
 
   async function handleSubmit(input: TaskInput) {
     if (await save(input)) navigate("/");
+  }
+
+  async function handleDelete() {
+    if (await remove()) navigate("/");
   }
 
   return (
@@ -50,7 +54,15 @@ function EditTaskPage() {
       {loading && <p>Loading...</p>}
       {error && <p>Error: {error}</p>}
       {task && (
-        <TaskForm key={task.id} task={task} onSubmit={handleSubmit} submitting={saving} error={saveError} />
+        <TaskForm
+          key={task.id}
+          task={task}
+          onSubmit={handleSubmit}
+          submitting={saving}
+          error={saveError ?? removeError}
+          onDelete={handleDelete}
+          deleting={removing}
+        />
       )}
     </>
   );

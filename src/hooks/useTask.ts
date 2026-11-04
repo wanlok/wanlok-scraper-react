@@ -10,6 +10,10 @@ interface UseTask {
   save: (input: TaskInput) => Promise<Task | null>;
   saving: boolean;
   saveError: string | null;
+  // DELETE /api/tasks/{id}. Returns true if the task was deleted (see `removeError`).
+  remove: () => Promise<boolean>;
+  removing: boolean;
+  removeError: string | null;
 }
 
 async function errorMessage(response: Response): Promise<string> {
@@ -25,6 +29,8 @@ export function useTask(id?: string): UseTask {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [removing, setRemoving] = useState(false);
+  const [removeError, setRemoveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (id === undefined) return;
@@ -70,5 +76,21 @@ export function useTask(id?: string): UseTask {
     }
   }
 
-  return { task, loading, error, save, saving, saveError };
+  async function remove(): Promise<boolean> {
+    if (id === undefined) return false;
+    setRemoving(true);
+    setRemoveError(null);
+    try {
+      const response = await fetch(`/api/tasks/${encodeURIComponent(id)}`, { method: "DELETE" });
+      if (!response.ok) throw new Error(await errorMessage(response));
+      return true;
+    } catch (e) {
+      setRemoveError(e instanceof Error ? e.message : String(e));
+      return false;
+    } finally {
+      setRemoving(false);
+    }
+  }
+
+  return { task, loading, error, save, saving, saveError, remove, removing, removeError };
 }

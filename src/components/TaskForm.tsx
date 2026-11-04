@@ -81,9 +81,14 @@ interface TaskFormProps {
   onSubmit: (input: TaskInput) => void | Promise<void>;
   submitting: boolean;
   error: string | null;
+  // Shows a Delete button (after a confirmation). Only makes sense when editing.
+  onDelete?: () => void | Promise<void>;
+  deleting?: boolean;
 }
 
-function TaskForm({ task, onSubmit, submitting, error }: TaskFormProps) {
+function TaskForm({ task, onSubmit, submitting, error, onDelete, deleting = false }: TaskFormProps) {
+  const busy = submitting || deleting;
+
   const initialData = splitDataSelector(task?.data_selector);
 
   const [name, setName] = useState(task?.name ?? "");
@@ -196,9 +201,24 @@ function TaskForm({ task, onSubmit, submitting, error }: TaskFormProps) {
 
       {error && <p role="alert">Error: {error}</p>}
 
-      <button type="submit" disabled={submitting}>
+      <button type="submit" disabled={busy}>
         {submitting ? "Saving..." : task ? "Save changes" : "Add task"}
       </button>
+
+      {onDelete && (
+        <>
+          {" "}
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              if (window.confirm(`Delete "${task?.name}" and its snapshots?`)) onDelete();
+            }}
+          >
+            {deleting ? "Deleting..." : "Delete"}
+          </button>
+        </>
+      )}
     </form>
   );
 }
