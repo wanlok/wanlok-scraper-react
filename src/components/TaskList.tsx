@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useTasks } from "../hooks/useTasks";
 
 function TaskList() {
@@ -11,8 +12,10 @@ function TaskList() {
     <ul>
       {tasks.map((task) => (
         <li key={task.id}>
-          <strong>{task.name}</strong>
-          <div>{task.url}</div>
+          <Link to={`/tasks/${task.id}`}>
+            <strong>{task.name}</strong>
+            <div>{task.url}</div>
+          </Link>
         </li>
       ))}
     </ul>
