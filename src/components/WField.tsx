@@ -2,13 +2,11 @@ import type { ReactNode } from "react";
 
 interface WFieldProps {
   label: string;
-  // The id of the input or textarea in `children`, so the label is linked to it.
   htmlFor: string;
   children: ReactNode;
 }
 
-// A label with its input, one above the other.
-function WField({ label, htmlFor, children }: WFieldProps) {
+const WField = ({ label, htmlFor, children }: WFieldProps) => {
   return (
     <div
       style={{
@@ -22,6 +20,6 @@ function WField({ label, htmlFor, children }: WFieldProps) {
       {children}
     </div>
   );
-}
+};
 
 export default WField;

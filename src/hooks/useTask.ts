@@ -16,14 +16,14 @@ interface UseTask {
   removeError: string | null;
 }
 
-async function errorMessage(response: Response): Promise<string> {
+const errorMessage = async (response: Response): Promise<string> => {
   const body = await response.json().catch(() => null);
   return body?.error ?? `HTTP ${response.status}`;
-}
+};
 
 // With an id, loads that task (GET /api/tasks/{id}, ignoring its snapshots) so it can be edited.
 // Without one, there is nothing to load and `save` adds a new task.
-export function useTask(id?: string): UseTask {
+export const useTask = (id?: string): UseTask => {
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(id !== undefined);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +57,7 @@ export function useTask(id?: string): UseTask {
     return () => controller.abort();
   }, [id]);
 
-  async function save(input: TaskInput): Promise<Task | null> {
+  const save = async (input: TaskInput): Promise<Task | null> => {
     setSaving(true);
     setSaveError(null);
     try {
@@ -74,9 +74,9 @@ export function useTask(id?: string): UseTask {
     } finally {
       setSaving(false);
     }
-  }
+  };
 
-  async function remove(): Promise<boolean> {
+  const remove = async (): Promise<boolean> => {
     if (id === undefined) return false;
     setRemoving(true);
     setRemoveError(null);
@@ -90,7 +90,7 @@ export function useTask(id?: string): UseTask {
     } finally {
       setRemoving(false);
     }
-  }
+  };
 
   return { task, loading, error, save, saving, saveError, remove, removing, removeError };
-}
+};

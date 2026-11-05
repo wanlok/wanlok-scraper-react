@@ -7,7 +7,7 @@ interface UseTasks {
   error: string | null;
 }
 
-export function useTasks(): UseTasks {
+export const useTasks = (): UseTasks => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,4 +34,4 @@ export function useTasks(): UseTasks {
   }, []);
 
   return { tasks, loading, error };
-}
+};

@@ -4,7 +4,7 @@ import TaskList from "./components/TaskList";
 import { useTask } from "./hooks/useTask";
 import type { TaskInput } from "./types";
 
-function TasksPage() {
+const TasksPage = () => {
   return (
     <>
       <p>
@@ -13,15 +13,15 @@ function TasksPage() {
       <TaskList />
     </>
   );
-}
+};
 
-function NewTaskPage() {
+const NewTaskPage = () => {
   const navigate = useNavigate();
   const { save, saving, saveError } = useTask();
 
-  async function handleSubmit(input: TaskInput) {
+  const handleSubmit = async (input: TaskInput) => {
     if (await save(input)) navigate("/");
-  }
+  };
 
   return (
     <>
@@ -31,20 +31,20 @@ function NewTaskPage() {
       <TaskForm onSubmit={handleSubmit} submitting={saving} error={saveError} />
     </>
   );
-}
+};
 
-function EditTaskPage() {
+const EditTaskPage = () => {
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const { task, loading, error, save, saving, saveError, remove, removing, removeError } = useTask(id);
 
-  async function handleSubmit(input: TaskInput) {
+  const handleSubmit = async (input: TaskInput) => {
     if (await save(input)) navigate("/");
-  }
+  };
 
-  async function handleDelete() {
+  const handleDelete = async () => {
     if (await remove()) navigate("/");
-  }
+  };
 
   return (
     <>
@@ -66,10 +66,10 @@ function EditTaskPage() {
       )}
     </>
   );
-}
+};
 
 // HashRouter: the phone's server only serves "/", so routes live after the "#".
-function App() {
+const App = () => {
   return (
     <HashRouter>
       <main>
@@ -82,6 +82,6 @@ function App() {
       </main>
     </HashRouter>
   );
-}
+};
 
 export default App;

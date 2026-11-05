@@ -2,20 +2,21 @@ import { useState, type FormEvent } from "react";
 import type { DataSelector, Task, TaskInput } from "../types";
 import WButton from "./WButton";
 import WField from "./WField";
+import WInput from "./WInput";
 
 // The selectors are typed as text. A page selector is a JSON object, or empty for none.
 // A data selector is a plain CSS selector, or a JSON object when it starts with "{".
 
-function stringifySelector(
+const stringifySelector = (
   selector?: DataSelector | Record<string, string>,
-): string {
+): string => {
   if (selector === undefined) return "";
   return typeof selector === "string"
     ? selector
     : JSON.stringify(selector, null, 2);
-}
+};
 
-function parseObject(text: string, label: string): Record<string, unknown> {
+const parseObject = (text: string, label: string): Record<string, unknown> => {
   let value: unknown;
   try {
     value = JSON.parse(text);
@@ -28,20 +29,20 @@ function parseObject(text: string, label: string): Record<string, unknown> {
     throw new Error(`${label} must be a JSON object`);
   }
   return value as Record<string, unknown>;
-}
+};
 
-function parsePageSelector(text: string): Record<string, string> | undefined {
+const parsePageSelector = (text: string): Record<string, string> | undefined => {
   const trimmed = text.trim();
   if (!trimmed) return undefined;
   return parseObject(trimmed, "Page selector") as Record<string, string>;
-}
+};
 
-function parseDataSelector(text: string): DataSelector {
+const parseDataSelector = (text: string): DataSelector => {
   const trimmed = text.trim();
   if (trimmed.startsWith("{"))
     return parseObject(trimmed, "Data selector") as DataSelector;
   return trimmed;
-}
+};
 
 interface TaskFormProps {
   // Give a task to edit it; leave it out to add a new one.
@@ -55,14 +56,14 @@ interface TaskFormProps {
   deleting?: boolean;
 }
 
-function TaskForm({
+const TaskForm = ({
   task,
   onSubmit,
   submitting,
   error,
   onDelete,
   deleting = false,
-}: TaskFormProps) {
+}: TaskFormProps) => {
   const busy = submitting || deleting;
 
   const [name, setName] = useState(task?.name ?? "");
@@ -75,7 +76,7 @@ function TaskForm({
   );
   const [inputError, setInputError] = useState<string | null>(null);
 
-  async function handleSubmit(event: FormEvent) {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
     let input: TaskInput;
@@ -94,7 +95,7 @@ function TaskForm({
 
     setInputError(null);
     await onSubmit(input);
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit}>
@@ -102,8 +103,10 @@ function TaskForm({
 
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <WField label="Name" htmlFor="task-name">
-          <input
+          <WInput
             id="task-name"
+            rows={1}
+            cols={60}
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -111,12 +114,14 @@ function TaskForm({
         </WField>
 
         <WField label="URL" htmlFor="task-url">
-          <input
+          <WInput
             id="task-url"
-            type="url"
+            rows={1}
+            cols={60}
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://"
+            spellCheck={false}
             required
           />
         </WField>
@@ -125,7 +130,7 @@ function TaskForm({
           label="Page selector (optional, JSON)"
           htmlFor="task-page-selector"
         >
-          <textarea
+          <WInput
             id="task-page-selector"
             rows={4}
             cols={60}
@@ -140,7 +145,7 @@ function TaskForm({
           label="Data selector (a CSS selector, or JSON)"
           htmlFor="task-data-selector"
         >
-          <textarea
+          <WInput
             id="task-data-selector"
             rows={8}
             cols={60}
@@ -176,6 +181,6 @@ function TaskForm({
       )}
     </form>
   );
-}
+};
 
 export default TaskForm;
