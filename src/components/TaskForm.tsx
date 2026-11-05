@@ -66,7 +66,6 @@ const TaskForm = ({
   onDelete,
   deleting = false,
 }: TaskFormProps) => {
-  const busy = submitting || deleting;
 
   const [name, setName] = useState(task?.name ?? "");
   const [url, setUrl] = useState(task?.url ?? "");
@@ -166,13 +165,13 @@ const TaskForm = ({
         )}
 
         <div>
-          <WButton type="submit" disabled={busy}>
+          <WButton type="submit" disabled={submitting || deleting}>
             {submitting ? "Saving..." : task ? "Save changes" : "Add task"}
           </WButton>
 
           {onDelete && (
             <WButton
-              disabled={busy}
+              disabled={submitting || deleting}
               onClick={() => {
                 if (window.confirm(`Delete "${task?.name}" and its snapshots?`))
                   onDelete();
