@@ -1,77 +1,37 @@
 import { useState, type FormEvent } from "react";
 import type { DataSelector, Task, TaskInput } from "../types";
 
-interface Pair {
-  key: string;
-  value: string;
+// The selectors are typed as text. A page selector is a JSON object, or empty for none.
+// A data selector is a plain CSS selector, or a JSON object when it starts with "{".
+
+function stringifySelector(selector?: DataSelector | Record<string, string>): string {
+  if (selector === undefined) return "";
+  return typeof selector === "string" ? selector : JSON.stringify(selector, null, 2);
 }
 
-type DataMode = "text" | "fields";
-
-const emptyPair: Pair = { key: "", value: "" };
-
-function toRecord(pairs: Pair[]): Record<string, string> {
-  const record: Record<string, string> = {};
-  for (const { key, value } of pairs) {
-    if (key.trim() && value.trim()) record[key.trim()] = value.trim();
+function parseObject(text: string, label: string): Record<string, unknown> {
+  let value: unknown;
+  try {
+    value = JSON.parse(text);
+  } catch (e) {
+    throw new Error(`${label} is not valid JSON: ${e instanceof Error ? e.message : e}`);
   }
-  return record;
-}
-
-function toPairs(record: Record<string, string> = {}): Pair[] {
-  const pairs = Object.entries(record).map(([key, value]) => ({ key, value }));
-  return pairs.length > 0 ? pairs : [emptyPair];
-}
-
-// A data selector is either a string, or an object with one container key.
-function splitDataSelector(selector?: DataSelector) {
-  if (typeof selector === "object") {
-    const [container = "", fields = {}] = Object.entries(selector)[0] ?? [];
-    return { mode: "fields" as DataMode, text: "", container, fields: toPairs(fields) };
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new Error(`${label} must be a JSON object`);
   }
-  return { mode: "text" as DataMode, text: selector ?? "", container: "", fields: toPairs() };
+  return value as Record<string, unknown>;
 }
 
-interface PairRowsProps {
-  pairs: Pair[];
-  keyPlaceholder: string;
-  valuePlaceholder: string;
-  onChange: (pairs: Pair[]) => void;
+function parsePageSelector(text: string): Record<string, string> | undefined {
+  const trimmed = text.trim();
+  if (!trimmed) return undefined;
+  return parseObject(trimmed, "Page selector") as Record<string, string>;
 }
 
-function PairRows({ pairs, keyPlaceholder, valuePlaceholder, onChange }: PairRowsProps) {
-  function update(index: number, patch: Partial<Pair>) {
-    onChange(pairs.map((pair, i) => (i === index ? { ...pair, ...patch } : pair)));
-  }
-
-  return (
-    <div>
-      {pairs.map((pair, index) => (
-        <div key={index}>
-          <input
-            placeholder={keyPlaceholder}
-            value={pair.key}
-            onChange={(e) => update(index, { key: e.target.value })}
-          />{" "}
-          <input
-            placeholder={valuePlaceholder}
-            value={pair.value}
-            onChange={(e) => update(index, { value: e.target.value })}
-          />{" "}
-          <button
-            type="button"
-            disabled={pairs.length === 1}
-            onClick={() => onChange(pairs.filter((_, i) => i !== index))}
-          >
-            Remove
-          </button>
-        </div>
-      ))}
-      <button type="button" onClick={() => onChange([...pairs, emptyPair])}>
-        Add
-      </button>
-    </div>
-  );
+function parseDataSelector(text: string): DataSelector {
+  const trimmed = text.trim();
+  if (trimmed.startsWith("{")) return parseObject(trimmed, "Data selector") as DataSelector;
+  return trimmed;
 }
 
 interface TaskFormProps {
@@ -89,32 +49,26 @@ interface TaskFormProps {
 function TaskForm({ task, onSubmit, submitting, error, onDelete, deleting = false }: TaskFormProps) {
   const busy = submitting || deleting;
 
-  const initialData = splitDataSelector(task?.data_selector);
-
   const [name, setName] = useState(task?.name ?? "");
   const [url, setUrl] = useState(task?.url ?? "");
-  const [pageSelectors, setPageSelectors] = useState<Pair[]>(toPairs(task?.page_selector));
-  const [dataMode, setDataMode] = useState<DataMode>(initialData.mode);
-  const [textSelector, setTextSelector] = useState(initialData.text);
-  const [container, setContainer] = useState(initialData.container);
-  const [fields, setFields] = useState<Pair[]>(initialData.fields);
-
-  function buildDataSelector(): DataSelector {
-    if (dataMode === "text") return textSelector.trim();
-    return { [container.trim()]: toRecord(fields) };
-  }
+  const [pageSelector, setPageSelector] = useState(stringifySelector(task?.page_selector));
+  const [dataSelector, setDataSelector] = useState(stringifySelector(task?.data_selector));
+  const [inputError, setInputError] = useState<string | null>(null);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
 
-    const input: TaskInput = {
-      name: name.trim(),
-      url: url.trim(),
-      data_selector: buildDataSelector(),
-    };
-    const pageSelector = toRecord(pageSelectors);
-    if (Object.keys(pageSelector).length > 0) input.page_selector = pageSelector;
+    let input: TaskInput;
+    try {
+      input = { name: name.trim(), url: url.trim(), data_selector: parseDataSelector(dataSelector) };
+      const parsedPageSelector = parsePageSelector(pageSelector);
+      if (parsedPageSelector) input.page_selector = parsedPageSelector;
+    } catch (e) {
+      setInputError(e instanceof Error ? e.message : String(e));
+      return;
+    }
 
+    setInputError(null);
     await onSubmit(input);
   }
 
@@ -141,65 +95,38 @@ function TaskForm({ task, onSubmit, submitting, error, onDelete, deleting = fals
         </label>
       </p>
 
-      <fieldset>
-        <legend>Page selector (optional)</legend>
-        <PairRows
-          pairs={pageSelectors}
-          keyPlaceholder="Pagination links, e.g. .pagination a"
-          valuePlaceholder="Page parameter, e.g. page"
-          onChange={setPageSelectors}
-        />
-      </fieldset>
-
-      <fieldset>
-        <legend>Data selector</legend>
+      <p>
         <label>
-          <input
-            type="radio"
-            checked={dataMode === "text"}
-            onChange={() => setDataMode("text")}
-          />{" "}
-          Text
-        </label>{" "}
-        <label>
-          <input
-            type="radio"
-            checked={dataMode === "fields"}
-            onChange={() => setDataMode("fields")}
-          />{" "}
-          Fields
+          Page selector (optional, JSON)
+          <br />
+          <textarea
+            rows={4}
+            cols={60}
+            value={pageSelector}
+            onChange={(e) => setPageSelector(e.target.value)}
+            placeholder={'{ ".pagination a": "page" }'}
+            spellCheck={false}
+          />
         </label>
+      </p>
 
-        {dataMode === "text" ? (
-          <p>
-            <input
-              placeholder="CSS selector, e.g. p.name"
-              value={textSelector}
-              onChange={(e) => setTextSelector(e.target.value)}
-              required
-            />
-          </p>
-        ) : (
-          <div>
-            <p>
-              <input
-                placeholder="Container selector, e.g. div.card"
-                value={container}
-                onChange={(e) => setContainer(e.target.value)}
-                required
-              />
-            </p>
-            <PairRows
-              pairs={fields}
-              keyPlaceholder="Field name, e.g. price"
-              valuePlaceholder="Selector, e.g. .price"
-              onChange={setFields}
-            />
-          </div>
-        )}
-      </fieldset>
+      <p>
+        <label>
+          Data selector (a CSS selector, or JSON)
+          <br />
+          <textarea
+            rows={8}
+            cols={60}
+            value={dataSelector}
+            onChange={(e) => setDataSelector(e.target.value)}
+            placeholder={'p.name\n\nor\n\n{ "div.card": { "name": "h6.card-title", "price": ".price" } }'}
+            spellCheck={false}
+            required
+          />
+        </label>
+      </p>
 
-      {error && <p role="alert">Error: {error}</p>}
+      {(inputError ?? error) && <p role="alert">Error: {inputError ?? error}</p>}
 
       <button type="submit" disabled={busy}>
         {submitting ? "Saving..." : task ? "Save changes" : "Add task"}
