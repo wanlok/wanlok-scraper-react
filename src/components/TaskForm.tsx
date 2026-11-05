@@ -4,9 +4,13 @@ import type { DataSelector, Task, TaskInput } from "../types";
 // The selectors are typed as text. A page selector is a JSON object, or empty for none.
 // A data selector is a plain CSS selector, or a JSON object when it starts with "{".
 
-function stringifySelector(selector?: DataSelector | Record<string, string>): string {
+function stringifySelector(
+  selector?: DataSelector | Record<string, string>,
+): string {
   if (selector === undefined) return "";
-  return typeof selector === "string" ? selector : JSON.stringify(selector, null, 2);
+  return typeof selector === "string"
+    ? selector
+    : JSON.stringify(selector, null, 2);
 }
 
 function parseObject(text: string, label: string): Record<string, unknown> {
@@ -14,7 +18,9 @@ function parseObject(text: string, label: string): Record<string, unknown> {
   try {
     value = JSON.parse(text);
   } catch (e) {
-    throw new Error(`${label} is not valid JSON: ${e instanceof Error ? e.message : e}`);
+    throw new Error(
+      `${label} is not valid JSON: ${e instanceof Error ? e.message : e}`,
+    );
   }
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     throw new Error(`${label} must be a JSON object`);
@@ -30,7 +36,8 @@ function parsePageSelector(text: string): Record<string, string> | undefined {
 
 function parseDataSelector(text: string): DataSelector {
   const trimmed = text.trim();
-  if (trimmed.startsWith("{")) return parseObject(trimmed, "Data selector") as DataSelector;
+  if (trimmed.startsWith("{"))
+    return parseObject(trimmed, "Data selector") as DataSelector;
   return trimmed;
 }
 
@@ -46,13 +53,24 @@ interface TaskFormProps {
   deleting?: boolean;
 }
 
-function TaskForm({ task, onSubmit, submitting, error, onDelete, deleting = false }: TaskFormProps) {
+function TaskForm({
+  task,
+  onSubmit,
+  submitting,
+  error,
+  onDelete,
+  deleting = false,
+}: TaskFormProps) {
   const busy = submitting || deleting;
 
   const [name, setName] = useState(task?.name ?? "");
   const [url, setUrl] = useState(task?.url ?? "");
-  const [pageSelector, setPageSelector] = useState(stringifySelector(task?.page_selector));
-  const [dataSelector, setDataSelector] = useState(stringifySelector(task?.data_selector));
+  const [pageSelector, setPageSelector] = useState(
+    stringifySelector(task?.page_selector),
+  );
+  const [dataSelector, setDataSelector] = useState(
+    stringifySelector(task?.data_selector),
+  );
   const [inputError, setInputError] = useState<string | null>(null);
 
   async function handleSubmit(event: FormEvent) {
@@ -60,7 +78,11 @@ function TaskForm({ task, onSubmit, submitting, error, onDelete, deleting = fals
 
     let input: TaskInput;
     try {
-      input = { name: name.trim(), url: url.trim(), data_selector: parseDataSelector(dataSelector) };
+      input = {
+        name: name.trim(),
+        url: url.trim(),
+        data_selector: parseDataSelector(dataSelector),
+      };
       const parsedPageSelector = parsePageSelector(pageSelector);
       if (parsedPageSelector) input.page_selector = parsedPageSelector;
     } catch (e) {
@@ -78,7 +100,12 @@ function TaskForm({ task, onSubmit, submitting, error, onDelete, deleting = fals
 
       <p>
         <label>
-          Name <input value={name} onChange={(e) => setName(e.target.value)} required />
+          Name{" "}
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
         </label>
       </p>
 
@@ -119,32 +146,34 @@ function TaskForm({ task, onSubmit, submitting, error, onDelete, deleting = fals
             cols={60}
             value={dataSelector}
             onChange={(e) => setDataSelector(e.target.value)}
-            placeholder={'p.name\n\nor\n\n{ "div.card": { "name": "h6.card-title", "price": ".price" } }'}
+            placeholder={
+              'p.name\n\nor\n\n{ "div.card": { "name": "h6.card-title", "price": ".price" } }'
+            }
             spellCheck={false}
             required
           />
         </label>
       </p>
 
-      {(inputError ?? error) && <p role="alert">Error: {inputError ?? error}</p>}
+      {(inputError ?? error) && (
+        <p role="alert">Error: {inputError ?? error}</p>
+      )}
 
       <button type="submit" disabled={busy}>
         {submitting ? "Saving..." : task ? "Save changes" : "Add task"}
       </button>
 
       {onDelete && (
-        <>
-          {" "}
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => {
-              if (window.confirm(`Delete "${task?.name}" and its snapshots?`)) onDelete();
-            }}
-          >
-            {deleting ? "Deleting..." : "Delete"}
-          </button>
-        </>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => {
+            if (window.confirm(`Delete "${task?.name}" and its snapshots?`))
+              onDelete();
+          }}
+        >
+          {deleting ? "Deleting..." : "Delete"}
+        </button>
       )}
     </form>
   );
