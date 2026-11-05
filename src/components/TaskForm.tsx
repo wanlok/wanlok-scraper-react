@@ -31,7 +31,9 @@ const parseObject = (text: string, label: string): Record<string, unknown> => {
   return value as Record<string, unknown>;
 };
 
-const parsePageSelector = (text: string): Record<string, string> | undefined => {
+const parsePageSelector = (
+  text: string,
+): Record<string, string> | undefined => {
   const trimmed = text.trim();
   if (!trimmed) return undefined;
   return parseObject(trimmed, "Page selector") as Record<string, string>;
@@ -158,27 +160,29 @@ const TaskForm = ({
             required
           />
         </WField>
+
+        {(inputError ?? error) && (
+          <p role="alert">Error: {inputError ?? error}</p>
+        )}
+
+        <div>
+          <WButton type="submit" disabled={busy}>
+            {submitting ? "Saving..." : task ? "Save changes" : "Add task"}
+          </WButton>
+
+          {onDelete && (
+            <WButton
+              disabled={busy}
+              onClick={() => {
+                if (window.confirm(`Delete "${task?.name}" and its snapshots?`))
+                  onDelete();
+              }}
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </WButton>
+          )}
+        </div>
       </div>
-
-      {(inputError ?? error) && (
-        <p role="alert">Error: {inputError ?? error}</p>
-      )}
-
-      <WButton type="submit" disabled={busy}>
-        {submitting ? "Saving..." : task ? "Save changes" : "Add task"}
-      </WButton>
-
-      {onDelete && (
-        <WButton
-          disabled={busy}
-          onClick={() => {
-            if (window.confirm(`Delete "${task?.name}" and its snapshots?`))
-              onDelete();
-          }}
-        >
-          {deleting ? "Deleting..." : "Delete"}
-        </WButton>
-      )}
     </form>
   );
 };
