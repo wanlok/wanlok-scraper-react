@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from "react";
 import type { DataSelector, Task, TaskInput } from "../types";
+import WButton from "./WButton";
+import WField from "./WField";
 
 // The selectors are typed as text. A page selector is a JSON object, or empty for none.
 // A data selector is a plain CSS selector, or a JSON object when it starts with "{".
@@ -98,35 +100,33 @@ function TaskForm({
     <form onSubmit={handleSubmit}>
       <h2>{task ? "Edit task" : "Add task"}</h2>
 
-      <p>
-        <label>
-          Name{" "}
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <WField label="Name" htmlFor="task-name">
           <input
+            id="task-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
           />
-        </label>
-      </p>
+        </WField>
 
-      <p>
-        <label>
-          URL{" "}
+        <WField label="URL" htmlFor="task-url">
           <input
+            id="task-url"
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://"
             required
           />
-        </label>
-      </p>
+        </WField>
 
-      <p>
-        <label>
-          Page selector (optional, JSON)
-          <br />
+        <WField
+          label="Page selector (optional, JSON)"
+          htmlFor="task-page-selector"
+        >
           <textarea
+            id="task-page-selector"
             rows={4}
             cols={60}
             value={pageSelector}
@@ -134,14 +134,14 @@ function TaskForm({
             placeholder={'{ ".pagination a": "page" }'}
             spellCheck={false}
           />
-        </label>
-      </p>
+        </WField>
 
-      <p>
-        <label>
-          Data selector (a CSS selector, or JSON)
-          <br />
+        <WField
+          label="Data selector (a CSS selector, or JSON)"
+          htmlFor="task-data-selector"
+        >
           <textarea
+            id="task-data-selector"
             rows={8}
             cols={60}
             value={dataSelector}
@@ -152,20 +152,19 @@ function TaskForm({
             spellCheck={false}
             required
           />
-        </label>
-      </p>
+        </WField>
+      </div>
 
       {(inputError ?? error) && (
         <p role="alert">Error: {inputError ?? error}</p>
       )}
 
-      <button type="submit" disabled={busy}>
+      <WButton type="submit" disabled={busy}>
         {submitting ? "Saving..." : task ? "Save changes" : "Add task"}
-      </button>
+      </WButton>
 
       {onDelete && (
-        <button
-          type="button"
+        <WButton
           disabled={busy}
           onClick={() => {
             if (window.confirm(`Delete "${task?.name}" and its snapshots?`))
@@ -173,7 +172,7 @@ function TaskForm({
           }}
         >
           {deleting ? "Deleting..." : "Delete"}
-        </button>
+        </WButton>
       )}
     </form>
   );
