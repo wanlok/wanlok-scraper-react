@@ -4,7 +4,7 @@ import {
   type TextareaHTMLAttributes,
 } from "react";
 
-const WInput = ({
+export const WInput = ({
   style,
   ...props
 }: TextareaHTMLAttributes<HTMLTextAreaElement>) => {
@@ -38,5 +38,3 @@ const WInput = ({
     />
   );
 };
-
-export default WInput;

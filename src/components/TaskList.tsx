@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useTasks } from "../hooks/useTasks";
 
-const TaskList = () => {
+export const TaskList = () => {
   const { tasks, loading, error } = useTasks();
 
   if (loading) return <p>Loading...</p>;
@@ -21,5 +21,3 @@ const TaskList = () => {
     </ul>
   );
 };
-
-export default TaskList;

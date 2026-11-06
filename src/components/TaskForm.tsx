@@ -1,8 +1,16 @@
 import { useState, type FormEvent } from "react";
 import type { DataSelector, Task, TaskInput } from "../types";
-import WButton from "./WButton";
-import WField from "./WField";
-import WInput from "./WInput";
+import { WButton } from "./WButton";
+import { WField } from "./WField";
+import { WInput } from "./WInput";
+import { WRadioGroup } from "./WRadioGroup";
+
+type YesNo = "yes" | "no";
+
+const enabledOptions: { value: YesNo; label: string }[] = [
+  { value: "yes", label: "Yes" },
+  { value: "no", label: "No" },
+];
 
 // The selectors are typed as text. A page selector is a JSON object, or empty for none.
 // A data selector is a plain CSS selector, or a JSON object when it starts with "{".
@@ -58,7 +66,7 @@ interface TaskFormProps {
   deleting?: boolean;
 }
 
-const TaskForm = ({
+export const TaskForm = ({
   task,
   onSubmit,
   submitting,
@@ -75,6 +83,9 @@ const TaskForm = ({
   const [dataSelector, setDataSelector] = useState(
     stringifySelector(task?.data_selector),
   );
+  const [enabled, setEnabled] = useState<YesNo>(
+    task?.enabled === false ? "no" : "yes",
+  );
   const [inputError, setInputError] = useState<string | null>(null);
 
   const handleSubmit = async (event: FormEvent) => {
@@ -86,6 +97,7 @@ const TaskForm = ({
         name: name.trim(),
         url: url.trim(),
         data_selector: parseDataSelector(dataSelector),
+        enabled: enabled === "yes",
       };
       const parsedPageSelector = parsePageSelector(pageSelector);
       if (parsedPageSelector) input.page_selector = parsedPageSelector;
@@ -160,6 +172,15 @@ const TaskForm = ({
           />
         </WField>
 
+        <WField label="Enabled" htmlFor="enabled-yes">
+          <WRadioGroup
+            name="enabled"
+            options={enabledOptions}
+            value={enabled}
+            onChange={setEnabled}
+          />
+        </WField>
+
         {(inputError ?? error) && (
           <p role="alert">Error: {inputError ?? error}</p>
         )}
@@ -185,5 +206,3 @@ const TaskForm = ({
     </form>
   );
 };
-
-export default TaskForm;

@@ -1,6 +1,6 @@
-import { HashRouter, Link, Route, Routes, useNavigate, useParams } from "react-router-dom";
-import TaskForm from "./components/TaskForm";
-import TaskList from "./components/TaskList";
+import { HashRouter, Link, Navigate, Route, Routes, useNavigate, useParams } from "react-router-dom";
+import { TaskForm } from "./components/TaskForm";
+import { TaskList } from "./components/TaskList";
 import { useTask } from "./hooks/useTask";
 import type { TaskInput } from "./types";
 
@@ -69,7 +69,7 @@ const EditTaskPage = () => {
 };
 
 // HashRouter: the phone's server only serves "/", so routes live after the "#".
-const App = () => {
+export const App = () => {
   return (
     <HashRouter>
       <main>
@@ -78,10 +78,9 @@ const App = () => {
           <Route path="/" element={<TasksPage />} />
           <Route path="/tasks/new" element={<NewTaskPage />} />
           <Route path="/tasks/:id" element={<EditTaskPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
     </HashRouter>
   );
 };
-
-export default App;

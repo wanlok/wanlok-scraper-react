@@ -6,7 +6,7 @@ interface WFieldProps {
   children: ReactNode;
 }
 
-const WField = ({ label, htmlFor, children }: WFieldProps) => {
+export const WField = ({ label, htmlFor, children }: WFieldProps) => {
   return (
     <div
       style={{
@@ -21,5 +21,3 @@ const WField = ({ label, htmlFor, children }: WFieldProps) => {
     </div>
   );
 };
-
-export default WField;
