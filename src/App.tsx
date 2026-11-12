@@ -1,4 +1,12 @@
-import { HashRouter, Link, Navigate, Route, Routes, useNavigate, useParams } from "react-router-dom";
+import {
+  HashRouter,
+  Link,
+  Navigate,
+  Route,
+  Routes,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import { TaskForm } from "./components/TaskForm";
 import { TaskList } from "./components/TaskList";
 import { useTask } from "./hooks/useTask";
@@ -24,19 +32,24 @@ const NewTaskPage = () => {
   };
 
   return (
-    <>
-      <p>
-        <Link to="/">Back</Link>
-      </p>
-      <TaskForm onSubmit={handleSubmit} submitting={saving} error={saveError} />
-    </>
+    <TaskForm onSubmit={handleSubmit} submitting={saving} error={saveError} />
   );
 };
 
 const EditTaskPage = () => {
   const { id = "" } = useParams();
   const navigate = useNavigate();
-  const { task, loading, error, save, saving, saveError, remove, removing, removeError } = useTask(id);
+  const {
+    task,
+    loading,
+    error,
+    save,
+    saving,
+    saveError,
+    remove,
+    removing,
+    removeError,
+  } = useTask(id);
 
   const handleSubmit = async (input: TaskInput) => {
     if (await save(input)) navigate("/");
@@ -48,9 +61,6 @@ const EditTaskPage = () => {
 
   return (
     <>
-      <p>
-        <Link to="/">Back</Link>
-      </p>
       {loading && <p>Loading...</p>}
       {error && <p>Error: {error}</p>}
       {task && (
@@ -73,7 +83,6 @@ export const App = () => {
   return (
     <HashRouter>
       <main>
-        <h1>Scraper</h1>
         <Routes>
           <Route path="/" element={<TasksPage />} />
           <Route path="/tasks/new" element={<NewTaskPage />} />
