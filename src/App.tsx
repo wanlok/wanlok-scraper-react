@@ -1,17 +1,6 @@
-import {
-  HashRouter,
-  Link,
-  Navigate,
-  Route,
-  Routes,
-  useNavigate,
-  useParams,
-} from "react-router-dom";
-import { TaskForm } from "./components/TaskForm";
+import { HashRouter, Link, Navigate, Route, Routes } from "react-router-dom";
 import { TaskList } from "./components/TaskList";
-import { WLoading } from "./components/WLoading";
-import { useTask } from "./hooks/useTask";
-import type { TaskInput } from "./types";
+import { TaskFormPage } from "./components/TaskFormPage";
 
 const TasksPage = () => {
   return (
@@ -24,67 +13,6 @@ const TasksPage = () => {
   );
 };
 
-const NewTaskPage = () => {
-  const navigate = useNavigate();
-  const { save, saving, saveError } = useTask();
-
-  const handleSubmit = async (input: TaskInput) => {
-    if (await save(input)) {
-      navigate("/");
-    }
-  };
-
-  return (
-    <TaskForm onSubmit={handleSubmit} submitting={saving} error={saveError} />
-  );
-};
-
-const EditTaskPage = () => {
-  const { id = "" } = useParams();
-  const navigate = useNavigate();
-  const {
-    task,
-    loading,
-    error,
-    save,
-    saving,
-    saveError,
-    remove,
-    removing,
-    removeError,
-  } = useTask(id);
-
-  const handleSubmit = async (input: TaskInput) => {
-    if (await save(input)) {
-      navigate("/");
-    }
-  };
-
-  const handleDelete = async () => {
-    if (await remove()) {
-      navigate("/");
-    }
-  };
-
-  return (
-    <>
-      {loading && <WLoading />}
-      {error && <p>Error: {error}</p>}
-      {task && (
-        <TaskForm
-          key={task.id}
-          task={task}
-          onSubmit={handleSubmit}
-          submitting={saving}
-          error={saveError ?? removeError}
-          onDelete={handleDelete}
-          deleting={removing}
-        />
-      )}
-    </>
-  );
-};
-
 // HashRouter: the phone's server only serves "/", so routes live after the "#".
 export const App = () => {
   return (
@@ -92,8 +20,8 @@ export const App = () => {
       <main>
         <Routes>
           <Route path="/" element={<TasksPage />} />
-          <Route path="/tasks/new" element={<NewTaskPage />} />
-          <Route path="/tasks/:id" element={<EditTaskPage />} />
+          <Route path="/tasks/new" element={<TaskFormPage />} />
+          <Route path="/tasks/:id" element={<TaskFormPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

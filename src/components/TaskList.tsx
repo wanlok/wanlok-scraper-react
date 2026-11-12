@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTasks } from "../hooks/useTasks";
+import { WError } from "./WError";
 import { WLoading } from "./WLoading";
 
 export const TaskList = () => {
@@ -8,9 +9,11 @@ export const TaskList = () => {
   if (loading) {
     return <WLoading />;
   }
+
   if (error) {
-    return <p>Error: {error}</p>;
+    return <WError error={error} />;
   }
+
   if (tasks.length === 0) {
     return <p>No tasks yet.</p>;
   }

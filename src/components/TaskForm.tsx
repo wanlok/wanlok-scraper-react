@@ -92,7 +92,6 @@ export const TaskForm = ({
     task?.enabled === false ? "no" : "yes",
   );
   const [inputError, setInputError] = useState<string | null>(null);
-
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
