@@ -18,7 +18,9 @@ const enabledOptions: { value: YesNo; label: string }[] = [
 const stringifySelector = (
   selector?: DataSelector | Record<string, string>,
 ): string => {
-  if (selector === undefined) return "";
+  if (selector === undefined) {
+    return "";
+  }
   return typeof selector === "string"
     ? selector
     : JSON.stringify(selector, null, 2);
@@ -43,14 +45,17 @@ const parsePageSelector = (
   text: string,
 ): Record<string, string> | undefined => {
   const trimmed = text.trim();
-  if (!trimmed) return undefined;
+  if (!trimmed) {
+    return undefined;
+  }
   return parseObject(trimmed, "Page selector") as Record<string, string>;
 };
 
 const parseDataSelector = (text: string): DataSelector => {
   const trimmed = text.trim();
-  if (trimmed.startsWith("{"))
+  if (trimmed.startsWith("{")) {
     return parseObject(trimmed, "Data selector") as DataSelector;
+  }
   return trimmed;
 };
 
@@ -100,7 +105,9 @@ export const TaskForm = ({
         enabled: enabled === "yes",
       };
       const parsedPageSelector = parsePageSelector(pageSelector);
-      if (parsedPageSelector) input.page_selector = parsedPageSelector;
+      if (parsedPageSelector) {
+        input.page_selector = parsedPageSelector;
+      }
     } catch (e) {
       setInputError(e instanceof Error ? e.message : String(e));
       return;
@@ -194,8 +201,11 @@ export const TaskForm = ({
             <WButton
               disabled={submitting || deleting}
               onClick={() => {
-                if (window.confirm(`Delete "${task?.name}" and its snapshots?`))
+                if (
+                  window.confirm(`Delete "${task?.name}" and its snapshots?`)
+                ) {
                   onDelete();
+                }
               }}
             >
               {deleting ? "Deleting..." : "Delete"}

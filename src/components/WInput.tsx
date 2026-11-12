@@ -13,7 +13,9 @@ export const WInput = ({
   useLayoutEffect(() => {
     const fitHeight = () => {
       const element = ref.current;
-      if (!element) return;
+      if (!element) {
+        return;
+      }
       element.style.height = "auto";
       const border = element.offsetHeight - element.clientHeight;
       element.style.height = `${element.scrollHeight + border}px`;

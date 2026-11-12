@@ -33,15 +33,21 @@ export const useTask = (id?: string): UseTask => {
   const [removeError, setRemoveError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (id === undefined) return;
+    if (id === undefined) {
+      return;
+    }
     const controller = new AbortController();
     setLoading(true);
     setError(null);
 
     fetch(`/api/tasks/${encodeURIComponent(id)}`, { signal: controller.signal })
       .then(async (response) => {
-        if (response.status === 404) throw new Error("Task not found");
-        if (!response.ok) throw new Error(await errorMessage(response));
+        if (response.status === 404) {
+          throw new Error("Task not found");
+        }
+        if (!response.ok) {
+          throw new Error(await errorMessage(response));
+        }
         return response.json() as Promise<Task>;
       })
       .then((data) => {
@@ -49,7 +55,9 @@ export const useTask = (id?: string): UseTask => {
         setLoading(false);
       })
       .catch((e: Error) => {
-        if (e.name === "AbortError") return;
+        if (e.name === "AbortError") {
+          return;
+        }
         setError(e.message);
         setLoading(false);
       });
@@ -66,7 +74,9 @@ export const useTask = (id?: string): UseTask => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
       });
-      if (!response.ok) throw new Error(await errorMessage(response));
+      if (!response.ok) {
+        throw new Error(await errorMessage(response));
+      }
       return (await response.json()) as Task;
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : String(e));
@@ -77,12 +87,16 @@ export const useTask = (id?: string): UseTask => {
   };
 
   const remove = async (): Promise<boolean> => {
-    if (id === undefined) return false;
+    if (id === undefined) {
+      return false;
+    }
     setRemoving(true);
     setRemoveError(null);
     try {
       const response = await fetch(`/api/tasks/${encodeURIComponent(id)}`, { method: "DELETE" });
-      if (!response.ok) throw new Error(await errorMessage(response));
+      if (!response.ok) {
+        throw new Error(await errorMessage(response));
+      }
       return true;
     } catch (e) {
       setRemoveError(e instanceof Error ? e.message : String(e));

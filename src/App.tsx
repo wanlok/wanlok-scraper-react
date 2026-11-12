@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 import { TaskForm } from "./components/TaskForm";
 import { TaskList } from "./components/TaskList";
+import { WLoading } from "./components/WLoading";
 import { useTask } from "./hooks/useTask";
 import type { TaskInput } from "./types";
 
@@ -28,7 +29,9 @@ const NewTaskPage = () => {
   const { save, saving, saveError } = useTask();
 
   const handleSubmit = async (input: TaskInput) => {
-    if (await save(input)) navigate("/");
+    if (await save(input)) {
+      navigate("/");
+    }
   };
 
   return (
@@ -52,16 +55,20 @@ const EditTaskPage = () => {
   } = useTask(id);
 
   const handleSubmit = async (input: TaskInput) => {
-    if (await save(input)) navigate("/");
+    if (await save(input)) {
+      navigate("/");
+    }
   };
 
   const handleDelete = async () => {
-    if (await remove()) navigate("/");
+    if (await remove()) {
+      navigate("/");
+    }
   };
 
   return (
     <>
-      {loading && <p>Loading...</p>}
+      {loading && <WLoading />}
       {error && <p>Error: {error}</p>}
       {task && (
         <TaskForm

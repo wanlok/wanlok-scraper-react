@@ -17,7 +17,9 @@ export const useTasks = (): UseTasks => {
 
     fetch("/api/tasks", { signal: controller.signal })
       .then((response) => {
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
         return response.json() as Promise<Task[]>;
       })
       .then((data) => {
@@ -25,7 +27,9 @@ export const useTasks = (): UseTasks => {
         setLoading(false);
       })
       .catch((e: Error) => {
-        if (e.name === "AbortError") return;
+        if (e.name === "AbortError") {
+          return;
+        }
         setError(e.message);
         setLoading(false);
       });
