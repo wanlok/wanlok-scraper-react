@@ -1,19 +1,14 @@
 import { Link } from "react-router-dom";
 import { useTasks } from "../hooks/useTasks";
+import type { Task } from "../types";
 import { WError } from "./WError";
 import { WLoading } from "./WLoading";
 
-export const TaskList = () => {
-  const { tasks, loading, error } = useTasks();
+interface TaskListProps {
+  tasks: Task[];
+}
 
-  if (loading) {
-    return <WLoading />;
-  }
-
-  if (error) {
-    return <WError error={error} />;
-  }
-
+const TaskList = ({ tasks }: TaskListProps) => {
   if (tasks.length === 0) {
     return <p>No tasks yet.</p>;
   }
@@ -29,5 +24,26 @@ export const TaskList = () => {
         </li>
       ))}
     </ul>
+  );
+};
+
+export const TaskPage = () => {
+  const { tasks, loading, error } = useTasks();
+
+  if (loading) {
+    return <WLoading />;
+  }
+
+  if (error) {
+    return <WError error={error} />;
+  }
+
+  return (
+    <>
+      <p>
+        <Link to="/tasks/new">Add task</Link>
+      </p>
+      <TaskList tasks={tasks} />
+    </>
   );
 };
