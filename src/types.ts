@@ -11,5 +11,17 @@ export interface TaskInput {
 }
 
 export interface Task extends TaskInput {
+  // Newest first. Only present when the task is loaded by id.
+  snapshots?: Snapshot[];
   id: string;
+}
+
+// An item is the text of a match, or an object of named fields (null for a missing field).
+export type ScrapedItem = string | Record<string, string | null>;
+
+export interface Snapshot {
+  date: string;
+  status: string;
+  data?: ScrapedItem[];
+  error?: string;
 }
