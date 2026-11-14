@@ -1,6 +1,6 @@
 import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
+import { TaskListPage } from "./components/TaskListPage";
 import { TaskPage } from "./components/TaskPage";
-import { TaskFormPage } from "./components/TaskFormPage";
 
 // HashRouter: the phone's server only serves "/", so routes live after the "#".
 export const App = () => {
@@ -8,9 +8,9 @@ export const App = () => {
     <HashRouter>
       <main>
         <Routes>
-          <Route path="/" element={<TaskPage />} />
-          <Route path="/tasks/new" element={<TaskFormPage />} />
-          <Route path="/tasks/:id" element={<TaskFormPage />} />
+          <Route path="/" element={<TaskListPage />} />
+          <Route path="/tasks/new" element={<TaskPage />} />
+          <Route path="/tasks/:id" element={<TaskPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

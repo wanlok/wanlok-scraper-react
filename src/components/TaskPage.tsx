@@ -1,34 +1,36 @@
-import { Link } from "react-router-dom";
-import { useTasks } from "../hooks/useTasks";
-import type { Task } from "../types";
+import { useNavigate, useParams } from "react-router-dom";
+import { useTask } from "../hooks/useTask";
+import type { TaskInput } from "../types";
+import { TaskForm } from "./TaskForm";
 import { WError } from "./WError";
 import { WLoading } from "./WLoading";
 
-interface TaskListProps {
-  tasks: Task[];
-}
-
-const TaskList = ({ tasks }: TaskListProps) => {
-  if (tasks.length === 0) {
-    return <p>No tasks yet.</p>;
-  }
-
-  return (
-    <ul>
-      {tasks.map((task) => (
-        <li key={task.id}>
-          <Link to={`/tasks/${task.id}`}>
-            <strong>{task.name}</strong>
-            <div>{task.url}</div>
-          </Link>
-        </li>
-      ))}
-    </ul>
-  );
-};
-
 export const TaskPage = () => {
-  const { tasks, loading, error } = useTasks();
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const {
+    task,
+    loading,
+    error,
+    save,
+    saving,
+    saveError,
+    remove,
+    removing,
+    removeError,
+  } = useTask(id);
+
+  const handleSubmit = async (input: TaskInput) => {
+    if (await save(input)) {
+      navigate("/");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (await remove()) {
+      navigate("/");
+    }
+  };
 
   if (loading) {
     return <WLoading />;
@@ -39,11 +41,14 @@ export const TaskPage = () => {
   }
 
   return (
-    <>
-      <p>
-        <Link to="/tasks/new">Add task</Link>
-      </p>
-      <TaskList tasks={tasks} />
-    </>
+    <TaskForm
+      key={task?.id}
+      task={task ?? undefined}
+      onSubmit={handleSubmit}
+      submitting={saving}
+      error={saveError ?? removeError}
+      onDelete={task ? handleDelete : undefined}
+      deleting={removing}
+    />
   );
 };
