@@ -3,6 +3,7 @@ import { useTask } from "../hooks/useTask";
 import type { TaskInput } from "../types";
 import { TaskForm } from "./TaskForm";
 import { TaskSnapshotList } from "./TaskSnapshotList";
+import { WButton } from "./WButton";
 import { WError } from "./WError";
 import { WLoading } from "./WLoading";
 import { WTabList } from "./WTabList";
@@ -29,6 +30,9 @@ export const TaskPage = () => {
     remove,
     removing,
     removeError,
+    run,
+    running,
+    runError,
   } = useTask(id);
 
   const handleSubmit = async (input: TaskInput) => {
@@ -80,7 +84,13 @@ export const TaskPage = () => {
         }
       />
       {tab === "snapshots" ? (
-        <TaskSnapshotList snapshots={task.snapshots ?? []} />
+        <>
+          <WButton onClick={run} disabled={running}>
+            {running ? "Starting..." : "Run"}
+          </WButton>
+          {runError && <WError error={runError} />}
+          <TaskSnapshotList snapshots={task.snapshots ?? []} />
+        </>
       ) : (
         form
       )}

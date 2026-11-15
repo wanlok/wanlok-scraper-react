@@ -14,6 +14,11 @@ interface UseTask {
   remove: () => Promise<boolean>;
   removing: boolean;
   removeError: string | null;
+  // POST /api/run/{id}. The server starts the run in the background and answers at once, so true
+  // means it started, not that it finished (see `runError`).
+  run: () => Promise<boolean>;
+  running: boolean;
+  runError: string | null;
 }
 
 const errorMessage = async (response: Response): Promise<string> => {
@@ -31,6 +36,8 @@ export const useTask = (id?: string): UseTask => {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [removing, setRemoving] = useState(false);
   const [removeError, setRemoveError] = useState<string | null>(null);
+  const [running, setRunning] = useState(false);
+  const [runError, setRunError] = useState<string | null>(null);
 
   useEffect(() => {
     if (id === undefined) {
@@ -106,5 +113,25 @@ export const useTask = (id?: string): UseTask => {
     }
   };
 
-  return { task, loading, error, save, saving, saveError, remove, removing, removeError };
+  const run = async (): Promise<boolean> => {
+    if (id === undefined) {
+      return false;
+    }
+    setRunning(true);
+    setRunError(null);
+    try {
+      const response = await fetch(`/api/run/${encodeURIComponent(id)}`, { method: "POST" });
+      if (!response.ok) {
+        throw new Error(await errorMessage(response));
+      }
+      return true;
+    } catch (e) {
+      setRunError(e instanceof Error ? e.message : String(e));
+      return false;
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  return { task, loading, error, save, saving, saveError, remove, removing, removeError, run, running, runError };
 };
