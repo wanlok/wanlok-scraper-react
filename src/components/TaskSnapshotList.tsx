@@ -9,5 +9,21 @@ export const TaskSnapshotList = ({ snapshots }: TaskSnapshotListProps) => {
     return <p>Nothing has been scraped yet.</p>;
   }
 
-  return <pre>{JSON.stringify(snapshots, null, 2)}</pre>;
+  return (
+    <ul>
+      {snapshots.map((snapshot) => (
+        <li key={snapshot.date}>
+          <details>
+            <summary style={{ listStyle: "none" }}>
+              <span style={{ display: "block" }}>
+                {new Date(snapshot.date).toLocaleString()}
+              </span>
+              <span style={{ display: "block" }}>{snapshot.status}</span>
+            </summary>
+            <pre>{JSON.stringify(snapshot.error ?? snapshot.data, null, 2)}</pre>
+          </details>
+        </li>
+      ))}
+    </ul>
+  );
 };
