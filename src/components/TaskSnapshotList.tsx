@@ -43,9 +43,11 @@ export const TaskSnapshotList = ({ snapshots }: TaskSnapshotListProps) => {
                 )}
               </span>
             </summary>
-            <pre style={{ background: "#DDDDDD", margin: 0 }}>
-              {JSON.stringify(snapshot.error ?? snapshot.data, null, 2)}
-            </pre>
+            <div style={{ background: "#DDDDDD", padding: "16px" }}>
+              <pre style={{ margin: 0 }}>
+                {JSON.stringify(snapshot.error ?? snapshot.data, null, 2)}
+              </pre>
+            </div>
           </details>
         </li>
       ))}
