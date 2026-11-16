@@ -14,13 +14,15 @@ export const TaskSnapshotList = ({ snapshots }: TaskSnapshotListProps) => {
       {snapshots.map((snapshot) => (
         <li key={snapshot.date}>
           <details>
-            <summary style={{ listStyle: "none" }}>
+            <summary style={{ background: "#EEEEEE" }}>
               <span style={{ display: "block" }}>
                 {new Date(snapshot.date).toLocaleString()}
               </span>
               <span style={{ display: "block" }}>{snapshot.status}</span>
             </summary>
-            <pre>{JSON.stringify(snapshot.error ?? snapshot.data, null, 2)}</pre>
+            <pre>
+              {JSON.stringify(snapshot.error ?? snapshot.data, null, 2)}
+            </pre>
           </details>
         </li>
       ))}
