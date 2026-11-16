@@ -10,17 +10,40 @@ export const TaskSnapshotList = ({ snapshots }: TaskSnapshotListProps) => {
   }
 
   return (
-    <ul>
+    <ul
+      style={{
+        listStyle: "none",
+        paddingLeft: 0,
+        display: "flex",
+        flexDirection: "column",
+        gap: 1,
+      }}
+    >
       {snapshots.map((snapshot) => (
         <li key={snapshot.date}>
           <details>
-            <summary style={{ background: "#EEEEEE" }}>
-              <span style={{ display: "block" }}>
-                {new Date(snapshot.date).toLocaleString()}
+            <summary style={{ background: "#EEEEEE", padding: "16px" }}>
+              <span
+                style={{
+                  display: "inline-block",
+                  verticalAlign: "top",
+                  marginLeft: "4px",
+                }}
+              >
+                <span style={{ display: "block" }}>
+                  {new Date(snapshot.date).toLocaleString()}
+                </span>
+                <span style={{ display: "block" }}>{snapshot.status}</span>
+                {snapshot.data && (
+                  <span style={{ display: "block" }}>
+                    {snapshot.data.length === 1
+                      ? "1 item"
+                      : `${snapshot.data.length} items`}
+                  </span>
+                )}
               </span>
-              <span style={{ display: "block" }}>{snapshot.status}</span>
             </summary>
-            <pre>
+            <pre style={{ background: "#DDDDDD", margin: 0 }}>
               {JSON.stringify(snapshot.error ?? snapshot.data, null, 2)}
             </pre>
           </details>
