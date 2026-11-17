@@ -22,7 +22,13 @@ export const TaskSnapshotList = ({ snapshots }: TaskSnapshotListProps) => {
       {snapshots.map((snapshot) => (
         <li key={snapshot.date}>
           <details>
-            <summary style={{ background: "#EEEEEE", padding: "16px" }}>
+            <summary
+              style={{
+                background: "#EEEEEE",
+                padding: "16px",
+                cursor: "pointer",
+              }}
+            >
               <span
                 style={{
                   display: "inline-block",
