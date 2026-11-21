@@ -78,9 +78,7 @@ export const TaskPage = () => {
         tabs={TABS}
         value={tab}
         onChange={(value) =>
-          setSearchParams(value === "snapshots" ? {} : { tab: value }, {
-            replace: true,
-          })
+          setSearchParams(value === "snapshots" ? {} : { tab: value })
         }
       />
       {tab === "snapshots" ? (
