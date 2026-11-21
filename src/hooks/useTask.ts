@@ -36,8 +36,31 @@ export const useTask = (id?: string): UseTask => {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [removing, setRemoving] = useState(false);
   const [removeError, setRemoveError] = useState<string | null>(null);
-  const [running, setRunning] = useState(false);
+  const [starting, setStarting] = useState(false);
   const [runError, setRunError] = useState<string | null>(null);
+  const running = starting || (task?.running ?? false);
+
+  const refresh = async () => {
+    if (id === undefined) {
+      return;
+    }
+    try {
+      const response = await fetch(`/api/tasks/${encodeURIComponent(id)}`);
+      if (response.ok) {
+        setTask((await response.json()) as Task);
+      }
+    } catch {
+      // Try again on the next tick.
+    }
+  };
+
+  useEffect(() => {
+    if (!task?.running) {
+      return;
+    }
+    const timer = setInterval(refresh, 2000);
+    return () => clearInterval(timer);
+  }, [id, task?.running]);
 
   useEffect(() => {
     if (id === undefined) {
@@ -117,19 +140,21 @@ export const useTask = (id?: string): UseTask => {
     if (id === undefined) {
       return false;
     }
-    setRunning(true);
+    setStarting(true);
     setRunError(null);
     try {
       const response = await fetch(`/api/run/${encodeURIComponent(id)}`, { method: "POST" });
       if (!response.ok) {
         throw new Error(await errorMessage(response));
       }
+      await refresh();
       return true;
     } catch (e) {
       setRunError(e instanceof Error ? e.message : String(e));
+      await refresh();
       return false;
     } finally {
-      setRunning(false);
+      setStarting(false);
     }
   };
 

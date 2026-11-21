@@ -86,7 +86,7 @@ export const TaskPage = () => {
       {tab === "snapshots" ? (
         <>
           <WButton onClick={run} disabled={running}>
-            {running ? "Starting..." : "Run"}
+            Run
           </WButton>
           {runError && <WError error={runError} />}
           <TaskSnapshotList snapshots={task.snapshots ?? []} />

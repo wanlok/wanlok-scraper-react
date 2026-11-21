@@ -13,6 +13,8 @@ export interface TaskInput {
 export interface Task extends TaskInput {
   // Newest first. Only present when the task is loaded by id.
   snapshots?: Snapshot[];
+  // Only present when the task is loaded by id: whether a run is in progress now.
+  running?: boolean;
   id: string;
 }
 
