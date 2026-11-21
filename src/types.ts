@@ -1,3 +1,11 @@
+import type { CSSProperties } from "react";
+
+// A style with a state: `hover` is laid over `regular` while the mouse is over the element.
+export interface WStyle {
+  regular: CSSProperties;
+  hover?: CSSProperties;
+}
+
 // A data selector is a CSS selector, or one container selector mapped to named field selectors.
 export type DataSelector = string | Record<string, Record<string, string>>;
 

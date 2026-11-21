@@ -1,5 +1,5 @@
-import type { KeyboardEvent, ReactNode } from "react";
-import { WButton } from "./WButton";
+import type { KeyboardEvent } from "react";
+import { tabStyle, WButton } from "./WButton";
 
 interface WTabListTab<T extends string> {
   value: T;
@@ -12,10 +12,6 @@ interface WTabListProps<T extends string> {
   value: T;
   onChange: (value: T) => void;
 }
-
-const tabId = (id: string, value: string) => `${id}-tab-${value}`;
-
-const panelId = (id: string, value: string) => `${id}-panel-${value}`;
 
 export const WTabList = <T extends string>({
   id,
@@ -43,47 +39,29 @@ export const WTabList = <T extends string>({
     }
     event.preventDefault();
     onChange(tabs[next].value);
-    document.getElementById(tabId(id, tabs[next].value))?.focus();
+    document.getElementById(`${id}-tab-${tabs[next].value}`)?.focus();
   };
 
   return (
-    <div role="tablist">
+    <div role="tablist" style={{ display: "flex", gap: 1 }}>
       {tabs.map((tab, index) => {
         const selected = tab.value === value;
         return (
           <WButton
             key={tab.value}
-            id={tabId(id, tab.value)}
+            id={`${id}-tab-${tab.value}`}
             role="tab"
             aria-selected={selected}
-            aria-controls={panelId(id, tab.value)}
+            aria-controls={`${id}-panel-${tab.value}`}
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(tab.value)}
             onKeyDown={(event) => handleKeyDown(event, index)}
+            wStyle={tabStyle}
           >
             {tab.label}
           </WButton>
         );
       })}
-    </div>
-  );
-};
-
-interface WTabPanelProps {
-  id: string;
-  value: string;
-  children: ReactNode;
-}
-
-export const WTabPanel = ({ id, value, children }: WTabPanelProps) => {
-  return (
-    <div
-      role="tabpanel"
-      id={panelId(id, value)}
-      aria-labelledby={tabId(id, value)}
-      tabIndex={0}
-    >
-      {children}
     </div>
   );
 };

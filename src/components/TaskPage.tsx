@@ -6,7 +6,8 @@ import { TaskSnapshotList } from "./TaskSnapshotList";
 import { WButton } from "./WButton";
 import { WError } from "./WError";
 import { WLoading } from "./WLoading";
-import { WTabList, WTabPanel } from "./WTabList";
+import { WTabList } from "./WTabList";
+import { WTabPanel } from "./WTabPanel";
 
 type Tab = "snapshots" | "edit";
 
