@@ -254,6 +254,7 @@ export const TaskForm = ({
 
           {task && (
             <WButton
+              disabled={submitting || deleting}
               onClick={() => {
                 window.location.href = `/api/tasks/${encodeURIComponent(task.id)}/export`;
               }}
