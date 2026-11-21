@@ -7,7 +7,7 @@ export interface TaskInput {
   url: string;
   page_selector?: Record<string, string>;
   data_selector: DataSelector;
-  enabled: boolean;
+  scheduled: boolean;
 }
 
 export interface Task extends TaskInput {

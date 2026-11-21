@@ -7,7 +7,7 @@ import { WRadioGroup } from "./WRadioGroup";
 
 type YesNo = "yes" | "no";
 
-const enabledOptions: { value: YesNo; label: string }[] = [
+const scheduledOptions: { value: YesNo; label: string }[] = [
   { value: "yes", label: "Yes" },
   { value: "no", label: "No" },
 ];
@@ -88,8 +88,8 @@ export const TaskForm = ({
   const [dataSelector, setDataSelector] = useState(
     stringifySelector(task?.data_selector),
   );
-  const [enabled, setEnabled] = useState<YesNo>(
-    task?.enabled === false ? "no" : "yes",
+  const [scheduled, setScheduled] = useState<YesNo>(
+    task?.scheduled === false ? "no" : "yes",
   );
   const [inputError, setInputError] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -108,7 +108,7 @@ export const TaskForm = ({
         stringifySelector(value.page_selector as Record<string, string>),
       );
       setDataSelector(stringifySelector(value.data_selector as DataSelector));
-      setEnabled(value.enabled === false ? "no" : "yes");
+      setScheduled(value.scheduled === false ? "no" : "yes");
       setInputError(null);
     } catch (e) {
       setInputError(e instanceof Error ? e.message : String(e));
@@ -124,7 +124,7 @@ export const TaskForm = ({
         name: name.trim(),
         url: url.trim(),
         data_selector: parseDataSelector(dataSelector),
-        enabled: enabled === "yes",
+        scheduled: scheduled === "yes",
       };
       const parsedPageSelector = parsePageSelector(pageSelector);
       if (parsedPageSelector) {
@@ -201,12 +201,12 @@ export const TaskForm = ({
           />
         </WField>
 
-        <WField label="Enabled" htmlFor="enabled-yes">
+        <WField label="Scheduled" htmlFor="scheduled-yes">
           <WRadioGroup
-            name="enabled"
-            options={enabledOptions}
-            value={enabled}
-            onChange={setEnabled}
+            name="scheduled"
+            options={scheduledOptions}
+            value={scheduled}
+            onChange={setScheduled}
           />
         </WField>
 
