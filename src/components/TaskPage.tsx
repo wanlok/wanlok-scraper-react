@@ -6,7 +6,7 @@ import { TaskSnapshotList } from "./TaskSnapshotList";
 import { WButton } from "./WButton";
 import { WError } from "./WError";
 import { WLoading } from "./WLoading";
-import { WTabList } from "./WTabList";
+import { WTabList, WTabPanel } from "./WTabList";
 
 type Tab = "snapshots" | "edit";
 
@@ -75,23 +75,26 @@ export const TaskPage = () => {
   return (
     <>
       <WTabList
+        id="task"
         tabs={TABS}
         value={tab}
         onChange={(value) =>
           setSearchParams(value === "snapshots" ? {} : { tab: value })
         }
       />
-      {tab === "snapshots" ? (
-        <>
-          <WButton onClick={run} disabled={running}>
-            Run
-          </WButton>
-          {runError && <WError error={runError} />}
-          <TaskSnapshotList snapshots={task.snapshots ?? []} />
-        </>
-      ) : (
-        form
-      )}
+      <WTabPanel id="task" value={tab}>
+        {tab === "snapshots" ? (
+          <>
+            <WButton onClick={run} disabled={running}>
+              Run
+            </WButton>
+            {runError && <WError error={runError} />}
+            <TaskSnapshotList snapshots={task.snapshots ?? []} />
+          </>
+        ) : (
+          form
+        )}
+      </WTabPanel>
     </>
   );
 };
