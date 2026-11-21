@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import type { DataSelector, Task, TaskInput } from "../types";
 import { WButton } from "./WButton";
 import { WField } from "./WField";
@@ -92,6 +92,29 @@ export const TaskForm = ({
     task?.enabled === false ? "no" : "yes",
   );
   const [inputError, setInputError] = useState<string | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  const handleImport = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) {
+      return;
+    }
+    try {
+      const value = parseObject(await file.text(), file.name);
+      setName(typeof value.name === "string" ? value.name : "");
+      setUrl(typeof value.url === "string" ? value.url : "");
+      setPageSelector(
+        stringifySelector(value.page_selector as Record<string, string>),
+      );
+      setDataSelector(stringifySelector(value.data_selector as DataSelector));
+      setEnabled(value.enabled === false ? "no" : "yes");
+      setInputError(null);
+    } catch (e) {
+      setInputError(e instanceof Error ? e.message : String(e));
+    }
+  };
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
@@ -192,6 +215,24 @@ export const TaskForm = ({
         )}
 
         <div>
+          {!task && (
+            <>
+              <WButton
+                disabled={submitting}
+                onClick={() => fileInput.current?.click()}
+              >
+                Import
+              </WButton>
+              <input
+                ref={fileInput}
+                type="file"
+                accept="application/json,.json"
+                onChange={handleImport}
+                hidden
+              />
+            </>
+          )}
+
           <WButton type="submit" disabled={submitting || deleting}>
             {submitting ? "Saving..." : task ? "Save changes" : "Add task"}
           </WButton>
@@ -208,6 +249,16 @@ export const TaskForm = ({
               }}
             >
               {deleting ? "Deleting..." : "Delete"}
+            </WButton>
+          )}
+
+          {task && (
+            <WButton
+              onClick={() => {
+                window.location.href = `/api/tasks/${encodeURIComponent(task.id)}/export`;
+              }}
+            >
+              Export
             </WButton>
           )}
         </div>
