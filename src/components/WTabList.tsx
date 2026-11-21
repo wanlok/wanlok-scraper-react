@@ -57,6 +57,9 @@ export const WTabList = <T extends string>({
             onClick={() => onChange(tab.value)}
             onKeyDown={(event) => handleKeyDown(event, index)}
             wStyle={tabStyle}
+            style={{
+              borderBottom: `4px solid ${selected ? "#000000" : "transparent"}`,
+            }}
           >
             {tab.label}
           </WButton>
