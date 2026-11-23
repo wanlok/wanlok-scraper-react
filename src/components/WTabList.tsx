@@ -1,5 +1,5 @@
 import type { KeyboardEvent } from "react";
-import { tabStyle, WButton } from "./WButton";
+import { selectedTabStyle, tabStyle, WButton } from "./WButton";
 
 interface WTabListTab<T extends string> {
   value: T;
@@ -43,7 +43,7 @@ export const WTabList = <T extends string>({
   };
 
   return (
-    <div role="tablist" style={{ display: "flex", gap: 1 }}>
+    <div role="tablist" style={{ display: "flex" }}>
       {tabs.map((tab, index) => {
         const selected = tab.value === value;
         return (
@@ -56,10 +56,12 @@ export const WTabList = <T extends string>({
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(tab.value)}
             onKeyDown={(event) => handleKeyDown(event, index)}
-            wStyle={tabStyle}
-            style={{
-              borderBottom: `4px solid ${selected ? "#000000" : "transparent"}`,
-            }}
+            wStyle={selected ? selectedTabStyle : tabStyle}
+            style={
+              {
+                // borderBottom: `4px solid ${selected ? "#000000" : "transparent"}`,
+              }
+            }
           >
             {tab.label}
           </WButton>

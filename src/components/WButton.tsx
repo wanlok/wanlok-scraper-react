@@ -1,4 +1,4 @@
-import { useState, type ButtonHTMLAttributes } from "react";
+import { useState, type ButtonHTMLAttributes, type CSSProperties } from "react";
 import type { WStyle } from "../types";
 
 export const clearStyle: WStyle = {
@@ -21,11 +21,23 @@ export const tabStyle: WStyle = {
     paddingLeft: 16,
     paddingRight: 16,
     height: 40,
-    backgroundColor: "#EEEEEE",
+    borderTop: "none",
+    borderLeft: "none",
+    borderRight: "none",
   },
   hover: {
     backgroundColor: "#DDDDDD",
   },
+};
+
+export const selectedTabStyle: WStyle = {
+  regular: {
+    ...tabStyle.regular,
+    borderTop: "black solid 1px",
+    borderLeft: "black solid 1px",
+    borderRight: "black solid 1px",
+  },
+  hover: tabStyle.hover,
 };
 
 interface WButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -39,6 +51,9 @@ export const WButton = ({
   ...props
 }: WButtonProps) => {
   const [hovered, setHovered] = useState(false);
+  const resetHover = Object.fromEntries(
+    Object.keys(wStyle?.hover ?? {}).map((key) => [key, "unset"]),
+  ) as CSSProperties;
 
   return (
     <button
@@ -46,6 +61,7 @@ export const WButton = ({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
+        ...resetHover,
         ...wStyle?.regular,
         ...(hovered && !props.disabled ? wStyle?.hover : undefined),
         ...style,
