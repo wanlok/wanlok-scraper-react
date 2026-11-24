@@ -79,7 +79,6 @@ export const TaskForm = ({
   onDelete,
   deleting = false,
 }: TaskFormProps) => {
-
   const [name, setName] = useState(task?.name ?? "");
   const [url, setUrl] = useState(task?.url ?? "");
   const [pageSelector, setPageSelector] = useState(
@@ -141,127 +140,129 @@ export const TaskForm = ({
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>{task ? "Edit task" : "Add task"}</h2>
+      <div style={{ paddingLeft: 16, paddingRight: 16 }}>
+        <h2>{task ? "Edit task" : "Add task"}</h2>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <WField label="Name" htmlFor="task-name">
-          <WInput
-            id="task-name"
-            rows={1}
-            cols={60}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </WField>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <WField label="Name" htmlFor="task-name">
+            <WInput
+              id="task-name"
+              rows={1}
+              cols={60}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </WField>
 
-        <WField label="URL" htmlFor="task-url">
-          <WInput
-            id="task-url"
-            rows={1}
-            cols={60}
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://"
-            spellCheck={false}
-            required
-          />
-        </WField>
+          <WField label="URL" htmlFor="task-url">
+            <WInput
+              id="task-url"
+              rows={1}
+              cols={60}
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://"
+              spellCheck={false}
+              required
+            />
+          </WField>
 
-        <WField
-          label="Page selector (optional, JSON)"
-          htmlFor="task-page-selector"
-        >
-          <WInput
-            id="task-page-selector"
-            rows={4}
-            cols={60}
-            value={pageSelector}
-            onChange={(e) => setPageSelector(e.target.value)}
-            placeholder={'{ ".pagination a": "page" }'}
-            spellCheck={false}
-          />
-        </WField>
+          <WField
+            label="Page selector (optional, JSON)"
+            htmlFor="task-page-selector"
+          >
+            <WInput
+              id="task-page-selector"
+              rows={4}
+              cols={60}
+              value={pageSelector}
+              onChange={(e) => setPageSelector(e.target.value)}
+              placeholder={'{ ".pagination a": "page" }'}
+              spellCheck={false}
+            />
+          </WField>
 
-        <WField
-          label="Data selector (a CSS selector, or JSON)"
-          htmlFor="task-data-selector"
-        >
-          <WInput
-            id="task-data-selector"
-            rows={8}
-            cols={60}
-            value={dataSelector}
-            onChange={(e) => setDataSelector(e.target.value)}
-            placeholder={
-              'p.name\n\nor\n\n{ "div.card": { "name": "h6.card-title", "price": ".price" } }'
-            }
-            spellCheck={false}
-            required
-          />
-        </WField>
+          <WField
+            label="Data selector (a CSS selector, or JSON)"
+            htmlFor="task-data-selector"
+          >
+            <WInput
+              id="task-data-selector"
+              rows={8}
+              cols={60}
+              value={dataSelector}
+              onChange={(e) => setDataSelector(e.target.value)}
+              placeholder={
+                'p.name\n\nor\n\n{ "div.card": { "name": "h6.card-title", "price": ".price" } }'
+              }
+              spellCheck={false}
+              required
+            />
+          </WField>
 
-        <WField label="Scheduled" htmlFor="scheduled-yes">
-          <WRadioGroup
-            name="scheduled"
-            options={scheduledOptions}
-            value={scheduled}
-            onChange={setScheduled}
-          />
-        </WField>
+          <WField label="Scheduled" htmlFor="scheduled-yes">
+            <WRadioGroup
+              name="scheduled"
+              options={scheduledOptions}
+              value={scheduled}
+              onChange={setScheduled}
+            />
+          </WField>
 
-        {(inputError ?? error) && (
-          <p role="alert">Error: {inputError ?? error}</p>
-        )}
+          {(inputError ?? error) && (
+            <p role="alert">Error: {inputError ?? error}</p>
+          )}
 
-        <div>
-          {!task && (
-            <>
+          <div>
+            {!task && (
+              <>
+                <WButton
+                  disabled={submitting}
+                  onClick={() => fileInput.current?.click()}
+                >
+                  Import
+                </WButton>
+                <input
+                  ref={fileInput}
+                  type="file"
+                  accept="application/json,.json"
+                  onChange={handleImport}
+                  hidden
+                />
+              </>
+            )}
+
+            <WButton type="submit" disabled={submitting || deleting}>
+              {submitting ? "Saving..." : task ? "Save changes" : "Add task"}
+            </WButton>
+
+            {onDelete && (
               <WButton
-                disabled={submitting}
-                onClick={() => fileInput.current?.click()}
+                disabled={submitting || deleting}
+                onClick={() => {
+                  if (
+                    window.confirm(`Delete "${task?.name}" and its snapshots?`)
+                  ) {
+                    onDelete();
+                  }
+                }}
               >
-                Import
+                {deleting ? "Deleting..." : "Delete"}
               </WButton>
-              <input
-                ref={fileInput}
-                type="file"
-                accept="application/json,.json"
-                onChange={handleImport}
-                hidden
-              />
-            </>
-          )}
+            )}
 
-          <WButton type="submit" disabled={submitting || deleting}>
-            {submitting ? "Saving..." : task ? "Save changes" : "Add task"}
-          </WButton>
-
-          {onDelete && (
-            <WButton
-              disabled={submitting || deleting}
-              onClick={() => {
-                if (
-                  window.confirm(`Delete "${task?.name}" and its snapshots?`)
-                ) {
-                  onDelete();
-                }
-              }}
-            >
-              {deleting ? "Deleting..." : "Delete"}
-            </WButton>
-          )}
-
-          {task && (
-            <WButton
-              disabled={submitting || deleting}
-              onClick={() => {
-                window.location.href = `/api/tasks/${encodeURIComponent(task.id)}/export`;
-              }}
-            >
-              Export
-            </WButton>
-          )}
+            {task && (
+              <WButton
+                disabled={submitting || deleting}
+                onClick={() => {
+                  window.location.href = `/api/tasks/${encodeURIComponent(task.id)}/export`;
+                }}
+              >
+                Export
+              </WButton>
+            )}
+          </div>
         </div>
       </div>
     </form>
