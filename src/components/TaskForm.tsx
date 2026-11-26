@@ -234,7 +234,7 @@ export const TaskForm = ({
             )}
 
             <WButton type="submit" disabled={submitting || deleting}>
-              {submitting ? "Saving..." : task ? "Save changes" : "Add task"}
+              {submitting ? "Saving..." : "Save"}
             </WButton>
 
             {onDelete && (
