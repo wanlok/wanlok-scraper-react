@@ -11,16 +11,20 @@ import { WTabPanel } from "./WTabPanel";
 
 type Tab = "snapshots" | "edit";
 
-const TABS: { value: Tab; label: string }[] = [
-  { value: "snapshots", label: "Snapshots" },
-  { value: "edit", label: "Edit task" },
-];
 
 export const TaskPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const tab: Tab = searchParams.get("tab") === "edit" ? "edit" : "snapshots";
+  const isNew = id === undefined;
+  const defaultTab: Tab = isNew ? "edit" : "snapshots";
+  const tabParam = searchParams.get("tab");
+  const tab: Tab =
+    tabParam === "edit" || tabParam === "snapshots" ? tabParam : defaultTab;
+  const tabs: { value: Tab; label: string }[] = [
+    { value: "snapshots", label: "Snapshots" },
+    { value: "edit", label: isNew ? "Add task" : "Edit task" },
+  ];
   const {
     task,
     loading,
@@ -68,29 +72,26 @@ export const TaskPage = () => {
     />
   );
 
-  // A new task has nothing scraped yet, so it only gets the form.
-  if (!task) {
-    return form;
-  }
-
   return (
     <>
       <WTabList
         id="task"
-        tabs={TABS}
+        tabs={tabs}
         value={tab}
         onChange={(value) =>
-          setSearchParams(value === "snapshots" ? {} : { tab: value })
+          setSearchParams(value === defaultTab ? {} : { tab: value })
         }
       />
       <WTabPanel id="task" value={tab}>
         {tab === "snapshots" ? (
           <>
-            <WButton onClick={run} disabled={running}>
-              Run
-            </WButton>
+            {task && (
+              <WButton onClick={run} disabled={running}>
+                Run
+              </WButton>
+            )}
             {runError && <WError error={runError} />}
-            <TaskSnapshotList snapshots={task.snapshots ?? []} />
+            <TaskSnapshotList snapshots={task?.snapshots ?? []} />
           </>
         ) : (
           form
