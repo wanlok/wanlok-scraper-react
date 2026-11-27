@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import type { Task, TaskInput } from "../types";
+import {
+  fieldsFromTask,
+  toTaskInput,
+  type TaskFields,
+} from "../taskFields";
+import type { Snapshot, Task, TaskInput } from "../types";
 
 interface UseTask {
   task: Task | null;
@@ -14,9 +19,14 @@ interface UseTask {
   remove: () => Promise<boolean>;
   removing: boolean;
   removeError: string | null;
-  // POST /api/run/{id}. The server starts the run in the background and answers at once, so true
-  // means it started, not that it finished (see `runError`).
-  run: () => Promise<boolean>;
+  // What the task form holds. It starts from the loaded task (or empty for a new one) and is kept
+  // here so it survives while the form is not shown.
+  fields: TaskFields;
+  setFields: (fields: TaskFields) => void;
+  // POST /api/run. The server waits for the run, which can take minutes, and answers with the result.
+  // A saved task is run with its id, so the snapshot is saved under it. A new task is run from
+  // `fields`, saves nothing, and the snapshot is only returned. Null means it failed (see `runError`).
+  run: () => Promise<Snapshot | null>;
   running: boolean;
   runError: string | null;
 }
@@ -30,6 +40,7 @@ const errorMessage = async (response: Response): Promise<string> => {
 // Without one, there is nothing to load and `save` adds a new task.
 export const useTask = (id?: string): UseTask => {
   const [task, setTask] = useState<Task | null>(null);
+  const [fields, setFields] = useState<TaskFields>(fieldsFromTask());
   const [loading, setLoading] = useState(id !== undefined);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -82,6 +93,7 @@ export const useTask = (id?: string): UseTask => {
       })
       .then((data) => {
         setTask(data);
+        setFields(fieldsFromTask(data));
         setLoading(false);
       })
       .catch((e: Error) => {
@@ -136,27 +148,40 @@ export const useTask = (id?: string): UseTask => {
     }
   };
 
-  const run = async (): Promise<boolean> => {
-    if (id === undefined) {
-      return false;
-    }
+  const run = async (): Promise<Snapshot | null> => {
     setStarting(true);
     setRunError(null);
     try {
-      const response = await fetch(`/api/run/${encodeURIComponent(id)}`, { method: "POST" });
+      let body: TaskInput & { id?: string };
+      if (task !== null) {
+        body = {
+          id: task.id,
+          name: task.name,
+          url: task.url,
+          page_selector: task.page_selector,
+          data_selector: task.data_selector,
+          scheduled: task.scheduled,
+        };
+      } else {
+        body = toTaskInput(fields);
+      }
+      const response = await fetch("/api/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
       if (!response.ok) {
         throw new Error(await errorMessage(response));
       }
-      await refresh();
-      return true;
+      return (await response.json()) as Snapshot;
     } catch (e) {
       setRunError(e instanceof Error ? e.message : String(e));
-      await refresh();
-      return false;
+      return null;
     } finally {
+      await refresh();
       setStarting(false);
     }
   };
 
-  return { task, loading, error, save, saving, saveError, remove, removing, removeError, run, running, runError };
+  return { task, loading, error, fields, setFields, save, saving, saveError, remove, removing, removeError, run, running, runError };
 };

@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useTask } from "../hooks/useTask";
-import type { TaskInput } from "../types";
+import type { Snapshot, TaskInput } from "../types";
 import { TaskForm } from "./TaskForm";
 import { TaskSnapshotList } from "./TaskSnapshotList";
 import { WButton } from "./WButton";
@@ -29,6 +30,8 @@ export const TaskPage = () => {
     task,
     loading,
     error,
+    fields,
+    setFields,
     save,
     saving,
     saveError,
@@ -39,6 +42,15 @@ export const TaskPage = () => {
     running,
     runError,
   } = useTask(id);
+
+  const [draftSnapshots, setDraftSnapshots] = useState<Snapshot[]>([]);
+
+  const handleRun = async () => {
+    const snapshot = await run();
+    if (snapshot && !task) {
+      setDraftSnapshots((previous) => [snapshot, ...previous]);
+    }
+  };
 
   const handleSubmit = async (input: TaskInput) => {
     if (await save(input)) {
@@ -62,8 +74,9 @@ export const TaskPage = () => {
 
   const form = (
     <TaskForm
-      key={task?.id}
       task={task ?? undefined}
+      fields={fields}
+      onFieldsChange={setFields}
       onSubmit={handleSubmit}
       submitting={saving}
       error={saveError ?? removeError}
@@ -85,13 +98,13 @@ export const TaskPage = () => {
       <WTabPanel id="task" value={tab}>
         {tab === "snapshots" ? (
           <>
-            {task && (
-              <WButton onClick={run} disabled={running}>
-                Run
-              </WButton>
-            )}
+            <WButton onClick={handleRun} disabled={running}>
+              Run
+            </WButton>
             {runError && <WError error={runError} />}
-            <TaskSnapshotList snapshots={task?.snapshots ?? []} />
+            <TaskSnapshotList
+              snapshots={task ? (task.snapshots ?? []) : draftSnapshots}
+            />
           </>
         ) : (
           form

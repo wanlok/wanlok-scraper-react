@@ -1,68 +1,28 @@
 import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import {
+  parseObject,
+  stringifySelector,
+  toTaskInput,
+  type TaskFields,
+  type YesNo,
+} from "../taskFields";
 import type { DataSelector, Task, TaskInput } from "../types";
 import { WButton } from "./WButton";
 import { WField } from "./WField";
 import { WInput } from "./WInput";
 import { WRadioGroup } from "./WRadioGroup";
 
-type YesNo = "yes" | "no";
-
 const scheduledOptions: { value: YesNo; label: string }[] = [
   { value: "yes", label: "Yes" },
   { value: "no", label: "No" },
 ];
 
-// The selectors are typed as text. A page selector is a JSON object, or empty for none.
-// A data selector is a plain CSS selector, or a JSON object when it starts with "{".
-
-const stringifySelector = (
-  selector?: DataSelector | Record<string, string>,
-): string => {
-  if (selector === undefined) {
-    return "";
-  }
-  return typeof selector === "string"
-    ? selector
-    : JSON.stringify(selector, null, 2);
-};
-
-const parseObject = (text: string, label: string): Record<string, unknown> => {
-  let value: unknown;
-  try {
-    value = JSON.parse(text);
-  } catch (e) {
-    throw new Error(
-      `${label} is not valid JSON: ${e instanceof Error ? e.message : e}`,
-    );
-  }
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    throw new Error(`${label} must be a JSON object`);
-  }
-  return value as Record<string, unknown>;
-};
-
-const parsePageSelector = (
-  text: string,
-): Record<string, string> | undefined => {
-  const trimmed = text.trim();
-  if (!trimmed) {
-    return undefined;
-  }
-  return parseObject(trimmed, "Page selector") as Record<string, string>;
-};
-
-const parseDataSelector = (text: string): DataSelector => {
-  const trimmed = text.trim();
-  if (trimmed.startsWith("{")) {
-    return parseObject(trimmed, "Data selector") as DataSelector;
-  }
-  return trimmed;
-};
-
 interface TaskFormProps {
   // Give a task to edit it; leave it out to add a new one.
-  // The fields start from the task, so use `key={task.id}` to show a different one.
   task?: Task;
+  // What the fields hold. The page owns them, so they survive while the form is not shown.
+  fields: TaskFields;
+  onFieldsChange: (fields: TaskFields) => void;
   onSubmit: (input: TaskInput) => void | Promise<void>;
   submitting: boolean;
   error: string | null;
@@ -73,23 +33,23 @@ interface TaskFormProps {
 
 export const TaskForm = ({
   task,
+  fields,
+  onFieldsChange,
   onSubmit,
   submitting,
   error,
   onDelete,
   deleting = false,
 }: TaskFormProps) => {
-  const [name, setName] = useState(task?.name ?? "");
-  const [url, setUrl] = useState(task?.url ?? "");
-  const [pageSelector, setPageSelector] = useState(
-    stringifySelector(task?.page_selector),
-  );
-  const [dataSelector, setDataSelector] = useState(
-    stringifySelector(task?.data_selector),
-  );
-  const [scheduled, setScheduled] = useState<YesNo>(
-    task?.scheduled === false ? "no" : "yes",
-  );
+  const { name, url, pageSelector, dataSelector, scheduled } = fields;
+  const setName = (value: string) => onFieldsChange({ ...fields, name: value });
+  const setUrl = (value: string) => onFieldsChange({ ...fields, url: value });
+  const setPageSelector = (value: string) =>
+    onFieldsChange({ ...fields, pageSelector: value });
+  const setDataSelector = (value: string) =>
+    onFieldsChange({ ...fields, dataSelector: value });
+  const setScheduled = (value: YesNo) =>
+    onFieldsChange({ ...fields, scheduled: value });
   const [inputError, setInputError] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -101,13 +61,15 @@ export const TaskForm = ({
     }
     try {
       const value = parseObject(await file.text(), file.name);
-      setName(typeof value.name === "string" ? value.name : "");
-      setUrl(typeof value.url === "string" ? value.url : "");
-      setPageSelector(
-        stringifySelector(value.page_selector as Record<string, string>),
-      );
-      setDataSelector(stringifySelector(value.data_selector as DataSelector));
-      setScheduled(value.scheduled === false ? "no" : "yes");
+      onFieldsChange({
+        name: typeof value.name === "string" ? value.name : "",
+        url: typeof value.url === "string" ? value.url : "",
+        pageSelector: stringifySelector(
+          value.page_selector as Record<string, string>,
+        ),
+        dataSelector: stringifySelector(value.data_selector as DataSelector),
+        scheduled: value.scheduled === false ? "no" : "yes",
+      });
       setInputError(null);
     } catch (e) {
       setInputError(e instanceof Error ? e.message : String(e));
@@ -119,16 +81,7 @@ export const TaskForm = ({
 
     let input: TaskInput;
     try {
-      input = {
-        name: name.trim(),
-        url: url.trim(),
-        data_selector: parseDataSelector(dataSelector),
-        scheduled: scheduled === "yes",
-      };
-      const parsedPageSelector = parsePageSelector(pageSelector);
-      if (parsedPageSelector) {
-        input.page_selector = parsedPageSelector;
-      }
+      input = toTaskInput(fields);
     } catch (e) {
       setInputError(e instanceof Error ? e.message : String(e));
       return;
