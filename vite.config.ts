@@ -13,6 +13,8 @@ export default defineConfig(({ mode }) => {
     // Relative asset paths, so the build works wherever the phone serves it from.
     base: "./",
     server: {
+      // Listen on all network interfaces, so other computers on the same network can open the dev server.
+      host: true,
       proxy: {
         "/api": { target: `http://${ipAddress}:${port}`, changeOrigin: true },
       },
