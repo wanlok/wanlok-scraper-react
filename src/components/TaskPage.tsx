@@ -10,21 +10,20 @@ import { WLoading } from "./WLoading";
 import { WTabList } from "./WTabList";
 import { WTabPanel } from "./WTabPanel";
 
-type Tab = "snapshots" | "edit";
-
+type Tab = "snapshots" | "definition";
 
 export const TaskPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const isNew = id === undefined;
-  const defaultTab: Tab = isNew ? "edit" : "snapshots";
+  const defaultTab: Tab = isNew ? "definition" : "snapshots";
   const tabParam = searchParams.get("tab");
   const tab: Tab =
-    tabParam === "edit" || tabParam === "snapshots" ? tabParam : defaultTab;
+    tabParam === "definition" || tabParam === "snapshots" ? tabParam : defaultTab;
   const tabs: { value: Tab; label: string }[] = [
     { value: "snapshots", label: "Snapshots" },
-    { value: "edit", label: isNew ? "Add task" : "Edit task" },
+    { value: "definition", label: "Definition" },
   ];
   const {
     task,

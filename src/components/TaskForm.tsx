@@ -94,8 +94,6 @@ export const TaskForm = ({
   return (
     <form onSubmit={handleSubmit}>
       <div style={{ paddingLeft: 16, paddingRight: 16 }}>
-        <h2>{task ? "Edit task" : "Add task"}</h2>
-
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <WField label="Name" htmlFor="task-name">
             <WInput

@@ -24,8 +24,9 @@ interface UseTask {
   fields: TaskFields;
   setFields: (fields: TaskFields) => void;
   // POST /api/run. The server waits for the run, which can take minutes, and answers with the result.
-  // A saved task is run with its id, so the snapshot is saved under it. A new task is run from
-  // `fields`, saves nothing, and the snapshot is only returned. Null means it failed (see `runError`).
+  // It always runs what `fields` holds now, saved or not. A saved task is sent with its id, so the
+  // snapshot is also saved under it (the task itself is not changed). A new task saves nothing, and
+  // the snapshot is only returned. Null means it failed (see `runError`).
   run: () => Promise<Snapshot | null>;
   running: boolean;
   runError: string | null;
@@ -152,18 +153,9 @@ export const useTask = (id?: string): UseTask => {
     setStarting(true);
     setRunError(null);
     try {
-      let body: TaskInput & { id?: string };
+      const body: TaskInput & { id?: string } = toTaskInput(fields);
       if (task !== null) {
-        body = {
-          id: task.id,
-          name: task.name,
-          url: task.url,
-          page_selector: task.page_selector,
-          data_selector: task.data_selector,
-          scheduled: task.scheduled,
-        };
-      } else {
-        body = toTaskInput(fields);
+        body.id = task.id;
       }
       const response = await fetch("/api/run", {
         method: "POST",
